@@ -49,7 +49,7 @@ interface VideoItem {
 type Item = GifItem | VideoItem;
 
 // Constants for masonry layout calculations
-const containerWidth = 312; // Fixed width for the masonry container
+const containerWidth = 292; // Fixed width for the masonry container
 const gap = 5; // Gap between items in the masonry layout
 const itemMinHeight = 50; // Minimum height for a masonry item
 const itemMaxHeight = 380; // Maximum height for a masonry item
