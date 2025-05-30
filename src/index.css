@@ -15,7 +15,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #8800ff; 
+  background-color: #8800ff;
   border-radius: 10px;
   border: 2px solid transparent;
   background-clip: padding-box;
@@ -26,20 +26,24 @@
   background-color: rgba(100, 100, 255, 0.7);
 }
 
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: clash-display-regular;
 }
 
-.main-container{
+body {
+  background-color: #18181b;
+}
+
+.main-container {
   display: flex;
   justify-content: center;
   background-color: #18181b;
 }
 
-.logo-container{
+.logo-container {
   display: flex;
   justify-content: left;
   width: 100%;
@@ -54,7 +58,7 @@
   padding: 10px;
 }
 
-.input-container{
+.input-container {
   display: flex;
   align-items: center;
   background-color: #ffffff;
@@ -71,7 +75,7 @@
   border: none;
 }
 
-.search-icon{
+.search-icon {
   display: flex;
   align-items: center;
   padding: 10px;
@@ -79,11 +83,7 @@
   background-color: #8800ff;
 }
 
-.masonry-container{
-  background-color: rebeccapurple;
-}
-
-.main-container-for-center{
+.main-container-for-center {
   display: flex;
   justify-content: center;
   overflow-y: scroll;
@@ -100,7 +100,7 @@
 
 @media (max-width: 768px) {
   .grid-container {
-    grid-template-columns: auto auto auto; 
+    grid-template-columns: auto auto auto;
   }
 }
 
@@ -131,24 +131,13 @@
   cursor: pointer;
 }
 
-.play-icon {
-  position: absolute;
-  top: 40%;
-  left: 45%;
-  color: white;
-  font-weight: bold;
-  font-size: 24px;
-  pointer-events: none;
-  text-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
-}
-
 .filter-switch {
-  border: 2px solid #f8db3a;
-  border-radius: 10px;
+  padding: 6px;
   position: relative;
   display: flex;
+  gap: 10px;
   align-items: center;
-  height: 40px;
+  height: 60px;
   width: 100%;
   overflow: hidden;
   margin: 10px 0;
@@ -163,25 +152,29 @@
   text-align: center;
   cursor: pointer;
   border: none;
+  border-radius: 8px;
+  box-shadow: #8800ff -4px 4px 0px 0px;
   position: relative;
   z-index: 1;
-  font-weight: 500;
   font-size: 14px;
   padding: 8px 0;
-  color: #f5f5f5;
+  color: #18181b;
   transition: color 0.3s ease;
+  background-color: #f8db3a;
+  transition: all 0.3s ease;
 }
 
-.filter-switch .background {
-  position: absolute;
-  width: calc(100% / 3 - 8px);
-  height: 28px;
-  background-color: #f8db3a;
-  top: 4px;
-  left: 4px;
-  border-radius: 8px;
-  transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  z-index: 0;
+.filter-switch label:hover {
+  transition: all 0.3s ease;
+  box-shadow: #5b08a4 0px 3px 0px 0px;
+  font-weight: bold;
+}
+
+.filter-switch label:active {
+  background-color: #e8c814;
+  box-shadow: rgb(201, 46, 70) 0px 0px 0px 0px;
+  transform: translateY(5px);
+  transition: 200ms;
 }
 
 #option2:checked ~ .background {
@@ -205,42 +198,64 @@
   border-radius: 8px;
 }
 
-.media-wrapper img{
+.media-wrapper img {
   width: 100%;
 }
 
 .media-overlay {
   position: absolute;
-  bottom: 10px;
-  left: 4px;
+  bottom: 0;
+  left: 0;
   right: 0;
-  width: 50px;
+  max-width: 100%;
   background: #8800ff;
   color: #fff;
-  padding: 6px 10px;
+  padding: 6px 5px;
   font-size: 12px;
   text-align: center;
   opacity: 0;
   transition: opacity 0.3s ease;
-  border-radius: 8px;
-  border-radius: 8px;
+  border-bottom-left-radius: 8px;
 }
 
-.media-wrapper:hover .media-overlay {
+.masonry-container > div:hover .media-overlay {
   opacity: 1;
 }
 
-    .masonry-container {
-        position: relative;
-        overflow-y: auto;
-        overflow-x: hidden;
-        height: 100dvh;
-        background-color: #18181b;
-        margin-top: 10px;
-        width: 100% !important;
-    }
+.masonry-container {
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100dvh;
+  background-color: #18181b;
+  margin-top: 10px;
+  width: 100% !important;
+}
 
-    img {
-        display: block;
-        object-fit: fill;
-    }
+img {
+  display: block;
+  object-fit: fill;
+}
+
+.play-icon {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  color: #18181b;
+  background-color: #f8db3a;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  z-index: 1;
+}
+
+.masonry-container > div:hover .play-icon {
+  opacity: 1;
+}

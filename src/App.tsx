@@ -187,10 +187,10 @@ const fetchItems = async ({
   const [searchQuery, activeTab] = queryKey;
   // Base URLs for different content types
   const baseUrls: Record<"GIF" | "Clip" | "Sticker", string> = {
-    GIF: "https://api.klipy.co/api/v1/c9UrScczWCLK1n8DLmh7HQAcVx3lc3E6Njip3ACHnlqMT1JoPKCV7hGkZUsk4X1u/gifs",
-    Clip: "https://api.klipy.co/api/v1/c9UrScczWCLK1n8DLmh7HQAcVx3lc3E6Njip3ACHnlqMT1JoPKCV7hGkZUsk4X1u/clips",
+    GIF: "https://api.klipy.co/api/v1/dpqErE0iyRRA9IyEJ3pweUzCPoWePs33Cm8W6GxRiiT7CFB8Ka4bPeKd6V5DLI0I/gifs",
+    Clip: "https://api.klipy.co/api/v1/dpqErE0iyRRA9IyEJ3pweUzCPoWePs33Cm8W6GxRiiT7CFB8Ka4bPeKd6V5DLI0I/clips",
     Sticker:
-      "https://api.klipy.co/api/v1/c9UrScczWCLK1n8DLmh7HQAcVx3lc3E6Njip3ACHnlqMT1JoPKCV7hGkZUsk4X1u/stickers",
+      "https://api.klipy.co/api/v1/dpqErE0iyRRA9IyEJ3pweUzCPoWePs33Cm8W6GxRiiT7CFB8Ka4bPeKd6V5DLI0I/stickers",
   };
 
   // Determine the API endpoint (search or trending)
@@ -341,14 +341,14 @@ export const App = () => {
             onChange={() => setActiveTab("GIF")}
           />
           <label className="option" htmlFor="option1">
-            GIF
+            GIFs
           </label>
 
           <input
             type="radio"
             id="option2"
             name="value-radio"
-            value="Sticker"
+            value="Stickers"
             checked={activeTab === "Sticker"}
             onChange={() => setActiveTab("Sticker")}
           />
@@ -365,7 +365,7 @@ export const App = () => {
             onChange={() => setActiveTab("Clip")}
           />
           <label className="option" htmlFor="option3">
-            Clip
+            Clips
           </label>
 
           <span className="background"></span> {/* Visual background for the active tab */}
