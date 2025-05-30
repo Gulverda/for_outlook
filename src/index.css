@@ -210,6 +210,85 @@ body {
   width: 100%;
 }
 
+/* Ensure the text overlay appears on hover */
+.media-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 5px;
+  font-size: 12px;
+  text-align: center;
+  opacity: 0; /* Hidden by default */
+  transition: opacity 0.3s ease;
+  z-index: 1; /* Ensure it's above the image, but below icons */
+}
+
+/* This makes the text overlay visible on hover of the parent .media-wrapper */
+.media-wrapper:hover .media-overlay {
+  opacity: 1;
+}
+
+/* Masonry Container - Ensure it has relative positioning and scrollability */
+.masonry-container {
+  position: relative; /* Crucial for absolute positioning of children */
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100dvh;
+  background-color: #18181b;
+  margin-top: 10px;
+  width: 100% !important; /* Ensure it takes full width */
+}
+
+img {
+  display: block;
+  object-fit: fill; /* Consider 'cover' for better aspect ratio handling within fixed boxes */
+}
+
+/* Play Icon for Videos */
+.play-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  color: #18181b;
+  background-color: #f8db3a;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0; /* Hidden by default */
+  transition: opacity 0.3s ease-in-out;
+  z-index: 299; /* Ensure it's above the image and text overlay */
+}
+
+/* This makes the play icon visible on hover of the parent .media-wrapper */
+.media-wrapper:hover .play-icon {
+  opacity: 1;
+}
+
+/* Sound Icon Overlay for Videos */
+.sound-icon-overlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2; /* Ensure it's above the image and text overlay */
+  color: white; /* Color of the SVG icon */
+  /* NO opacity: 0 and NO hover effect here if you want it always visible */
+}
+
+
 .masonry-container > div:hover .media-overlay {
   opacity: 1;
 }

@@ -3,6 +3,8 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import Skeleton from "react-loading-skeleton";
 import LogoIcon from "./icons/logo";
 import SearchIcon from "./icons/Search";
+import MuteIcon from "./icons/MuteIcon";   // Import the new icons
+import VolumeIcon from "./icons/VolumeIcon"; // Import the new icons
 import "react-loading-skeleton/dist/skeleton.css";
 import "./index.css";
 
@@ -38,11 +40,14 @@ interface VideoItem {
   uuid: string;
   slug: string;
   file: {
-    thumbnail_url_webp: string; // Not directly used in masonry for dimensions, but good to have
+    thumbnail_url_webp: string;
     webp: string; // Used for displaying the thumbnail in the masonry layout
     mp4: string; // Used for inserting the video
   };
   title: string;
+  // Add an optional 'hasAudio' property if your API provides it
+  // For demonstration, we'll assume videos typically have audio if not specified.
+  hasAudio?: boolean;
 }
 
 // Define a type that can be either GifItem or VideoItem for flexibility in masonry logic
@@ -86,7 +91,7 @@ function precalculateSingleRow(possibleItemsInRow: Item[]): any[] {
         // This is a VideoItem (Clip)
         // Placeholder dimensions for video thumbnails as they are not provided in the interface.
         // If your API provides thumbnail dimensions, update VideoItem interface and use them here for accuracy.
-        itemWidth = 160; // Example width
+        itemWidth = 160; // Example width, assume a common video aspect ratio for thumbs
         itemHeight = 90; // Example height (16:9 aspect ratio)
       } else {
         // Skip if item type is not recognized or lacks necessary dimension data
@@ -157,6 +162,9 @@ function createRows(items: Item[]): any[][] {
   while (currentIndex < items.length) {
     // Take a slice of items to consider for the next row (up to maxItemsPerRow)
     const itemsForRow = items.slice(currentIndex, currentIndex + maxItemsPerRow);
+    // If no items are left to process, break to prevent infinite loop
+    if (itemsForRow.length === 0) break;
+
     const adjustedRow = precalculateSingleRow(itemsForRow);
 
     // If no valid items could form a row (e.g., due to missing dimensions), advance index to prevent infinite loop
@@ -189,8 +197,7 @@ const fetchItems = async ({
   const baseUrls: Record<"GIF" | "Clip" | "Sticker", string> = {
     GIF: "https://api.klipy.co/api/v1/dpqErE0iyRRA9IyEJ3pweUzCPoWePs33Cm8W6GxRiiT7CFB8Ka4bPeKd6V5DLI0I/gifs",
     Clip: "https://api.klipy.co/api/v1/dpqErE0iyRRA9IyEJ3pweUzCPoWePs33Cm8W6GxRiiT7CFB8Ka4bPeKd6V5DLI0I/clips",
-    Sticker:
-      "https://api.klipy.co/api/v1/dpqErE0iyRRA9IyEJ3pweUzCPoWePs33Cm8W6GxRiiT7CFB8Ka4bPeKd6V5DLI0I/stickers",
+    Sticker: "https://api.klipy.co/api/v1/dpqErE0iyRRA9IyEJ3pweUzCPoWePs33Cm8W6GxRiiT7CFB8Ka4bPeKd6V5DLI0I/stickers",
   };
 
   // Determine the API endpoint (search or trending)
@@ -223,7 +230,7 @@ export const App = () => {
    */
   const insertHtmlToEmailBody = (html: string) => {
     // Check if Office.js is loaded and the mailbox item body is available
-    if (typeof Office !== 'undefined' && Office.context.mailbox.item?.body) {
+    if (typeof Office !== "undefined" && Office.context.mailbox.item?.body) {
       Office.context.mailbox.item.body.setSelectedDataAsync(
         html,
         { coercionType: Office.CoercionType.Html },
@@ -234,7 +241,9 @@ export const App = () => {
         }
       );
     } else {
-      console.warn("Office.js is not initialized or not in an Outlook environment. Cannot insert content.");
+      console.warn(
+        "Office.js is not initialized or not in an Outlook environment. Cannot insert content."
+      );
     }
   };
 
@@ -257,7 +266,7 @@ export const App = () => {
     const html = `
       <a href="${mp4Url}" target="_blank" rel="noopener noreferrer">
         <img src="${posterUrl}" alt="Video thumbnail" style="max-width:100%;height:auto;" />
-        <p>Click to watch video</p>
+        <p style="font-size:10px; color:#555;">Click to watch video</p>
       </a>
     `;
     insertHtmlToEmailBody(html);
@@ -269,7 +278,7 @@ export const App = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    isLoading
+    isLoading,
   } = useInfiniteQuery({
     queryKey: [searchQuery, activeTab], // Query key changes when search query or active tab changes, triggering refetch
     queryFn: ({ pageParam = 1 }) =>
@@ -277,7 +286,7 @@ export const App = () => {
     // Determines the next page parameter for infinite scrolling
     getNextPageParam: (lastPage, pages) =>
       lastPage.length === 50 ? pages.length + 1 : undefined, // If last page has 50 items, there might be more
-    initialPageParam: 1 // Start fetching from page 1
+    initialPageParam: 1, // Start fetching from page 1
   });
 
   // Flatten the fetched data pages into a single array of items
@@ -291,12 +300,15 @@ export const App = () => {
     if (!hasNextPage || isFetchingNextPage) return;
 
     // Create a new Intersection Observer instance
-    const observer = new IntersectionObserver((entries) => {
-      // If the loader element is intersecting the viewport, fetch the next page
-      if (entries[0].isIntersecting) {
-        fetchNextPage();
-      }
-    }, { threshold: 1.0 }); // Trigger when 100% of the loader is visible
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // If the loader element is intersecting the viewport, fetch the next page
+        if (entries[0].isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 1.0 }
+    ); // Trigger when 100% of the loader is visible
 
     const loader = loaderRef.current;
     // If the loader element exists, observe it
@@ -368,7 +380,8 @@ export const App = () => {
             Clips
           </label>
 
-          <span className="background"></span> {/* Visual background for the active tab */}
+          <span className="background"></span>{" "}
+          {/* Visual background for the active tab */}
         </div>
 
         {/* Conditional rendering for loading state (Skeletons) or actual content */}
@@ -387,11 +400,19 @@ export const App = () => {
           </div>
         ) : (
           // Masonry Container for displaying fetched items
-          <div className="masonry-container" style={{ position: 'relative', width: containerWidth }}>
+          <div
+            className="masonry-container"
+            style={{ position: "relative", width: containerWidth }}
+          >
             {rows.map((row, rowIndex) => {
               let currentX = 0; // X-position for items in the current row
               // Calculate the top position for the current row based on previous rows' heights and gaps
-              const rowTop = rowIndex === 0 ? 0 : rows.slice(0, rowIndex).reduce((sum, r) => sum + r[0].height + gap, 0);
+              const rowTop =
+                rowIndex === 0
+                  ? 0
+                  : rows
+                      .slice(0, rowIndex)
+                      .reduce((sum, r) => sum + r[0].height + gap, 0);
 
               return row.map((item, i) => {
                 const left = currentX; // Left position for the current item
@@ -400,16 +421,22 @@ export const App = () => {
 
                 let imageUrl = item.url; // Default image URL from masonry calculation
                 let clickHandler; // Function to call on item click
+                let showPlayIcon = false;
+                let showSoundIcon = false; // New: Flag to show sound icon
 
                 // Determine the correct image URL for display and the click handler based on the active tab
                 if (activeTab === "GIF" || activeTab === "Sticker") {
                   const gifItem = item as GifItem;
                   imageUrl = gifItem.file.sm.webp.url; // Use small webp for display in masonry for performance
-                  clickHandler = () => insertGif(gifItem.file.md.gif.url, gifItem.title); // Use full GIF for insertion
+                  clickHandler = () =>
+                    insertGif(gifItem.file.md.gif.url, gifItem.title); // Use full GIF for insertion
                 } else if (activeTab === "Clip") {
                   const videoItem = item as VideoItem;
                   imageUrl = videoItem.file.webp; // Use webp thumbnail for display
-                  clickHandler = () => insertVideo(videoItem.file.mp4, videoItem.file.webp); // Insert video link
+                  clickHandler = () =>
+                    insertVideo(videoItem.file.mp4, videoItem.file.webp); // Insert video link
+                  showPlayIcon = true; // Show play icon for clips
+                  showSoundIcon = (videoItem.hasAudio ?? true); // Assume audio if not specified
                 }
 
                 return (
@@ -430,10 +457,22 @@ export const App = () => {
                     <img
                       src={imageUrl}
                       alt={item.title}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }} // Image fills its container, maintaining aspect ratio
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }} // Image fills its container, maintaining aspect ratio
                     />
                     {/* Render play icon only for Clip items */}
-                    {activeTab === "Clip" && <div className="play-icon">▶</div>}
+                    {showPlayIcon && <div className="play-icon">▶</div>}
+                    {/* Render sound icon only for Clip items */}
+                    {showSoundIcon && (
+                      <div className="sound-icon-overlay">
+                        {/* Here you could toggle between MuteIcon and VolumeIcon if implementing in-app mute,
+                            but for email insertion, VolumeIcon is a sufficient indicator. */}
+                        <VolumeIcon />
+                      </div>
+                    )}
                     {/* Overlay to display the content type (GIF, Sticker, Clip) */}
                     <div className="media-overlay">{activeTab}</div>
                   </div>
