@@ -5,6 +5,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: "clash-display-semibold";
+  src: url("../public/fonts/ClashDisplay-Semibold.woff") format("woff");
+  font-weight: 600;
+  font-style: normal;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -34,7 +41,7 @@
 }
 
 body {
-  background-color: #18181b;
+  background-color: #19191c;
 }
 
 .main-container {
@@ -148,31 +155,31 @@ body {
 }
 
 .filter-switch label {
+  font-family: clash-display-semibold;
   flex: 1;
   text-align: center;
   cursor: pointer;
-  border: none;
-  border-radius: 8px;
-  box-shadow: #8800ff -4px 4px 0px 0px;
+  border: 2px solid #000000;
+  border-radius: 12px;
+  box-shadow: #000000 -4px 4px 0px 0px;
   position: relative;
   z-index: 1;
   font-size: 14px;
   padding: 8px 0;
   color: #18181b;
   transition: color 0.3s ease;
-  background-color: #f8db3a;
+  background-color: #ffffff;
   transition: all 0.3s ease;
 }
 
 .filter-switch label:hover {
   transition: all 0.3s ease;
-  box-shadow: #5b08a4 0px 3px 0px 0px;
+  box-shadow: #000000 0px 3px 0px 0px;
   font-weight: bold;
 }
 
 .filter-switch label:active {
-  background-color: #e8c814;
-  box-shadow: rgb(201, 46, 70) 0px 0px 0px 0px;
+  background-color: #c9ab05;
   transform: translateY(5px);
   transition: 200ms;
 }
@@ -188,6 +195,7 @@ body {
 #option2:checked + label,
 #option3:checked + label {
   color: #18181b;
+  background-color: #f8db3a;
   font-weight: bold;
 }
 
@@ -200,22 +208,6 @@ body {
 
 .media-wrapper img {
   width: 100%;
-}
-
-.media-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  max-width: 100%;
-  background: #8800ff;
-  color: #fff;
-  padding: 6px 5px;
-  font-size: 12px;
-  text-align: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  border-bottom-left-radius: 8px;
 }
 
 .masonry-container > div:hover .media-overlay {
@@ -239,7 +231,7 @@ img {
 
 .play-icon {
   position: absolute;
-  top: 40%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 12px;
