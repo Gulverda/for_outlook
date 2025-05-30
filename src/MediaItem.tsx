@@ -53,7 +53,7 @@ const MediaItem: React.FC<MediaItemProps> = ({
   left,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isMuted, setIsMuted] = useState(true); // Start muted for autoplay
+  const [isMuted, setIsMuted] = useState(true); // Start muted as default for first play
   const [isTrulyPlaying, setIsTrulyPlaying] = useState(false); // Tracks actual playback state of the video element
 
   let imageUrl: string;
@@ -81,16 +81,8 @@ const MediaItem: React.FC<MediaItemProps> = ({
     isVideo = true;
   }
 
-  // Effect for auto-play (muted) when component mounts or `isVideo` becomes true
-  useEffect(() => {
-    const videoElement = videoRef.current;
-    if (isVideo && videoElement) {
-      videoElement.muted = true; // Ensure it's muted for autoplay
-      videoElement.play().catch(error => {
-        console.warn("Video autoplay blocked or failed:", error);
-      });
-    }
-  }, [isVideo]); // Dependency on isVideo to ensure it runs only when it's a video item
+  // REMOVED: Effect for auto-play (muted) when component mounts or `isVideo` becomes true
+  // The video will now only start on explicit click of the sound button.
 
   // Effect to update `isTrulyPlaying` state based on video element's play/pause events
   useEffect(() => {
@@ -113,6 +105,8 @@ const MediaItem: React.FC<MediaItemProps> = ({
 
   // Handle click on the main media item area (only for insertion)
   const handleMediaClick = (e: React.MouseEvent) => {
+    // This handler will only be responsible for inserting the item
+    // It's attached to the main `media-wrapper` div
     if (isVideo) {
       if (insertionDetails?.mp4 && imageUrl) { // Use imageUrl as posterUrl
           insertVideo(insertionDetails.mp4, imageUrl);
@@ -163,9 +157,9 @@ const MediaItem: React.FC<MediaItemProps> = ({
         <video
           ref={videoRef}
           src={insertionDetails?.mp4}
-          poster={imageUrl} // Use display thumbnail as poster
-          loop // Keep video looping for continuous display
-          muted={isMuted} // Controlled by our state, starts muted
+          poster={imageUrl} // Video will show this poster until played
+          loop // Keep video looping once played
+          muted={isMuted} // Controlled by our state
           playsInline // Crucial for inline playback on iOS Safari
           preload="metadata" // Load enough data to show thumbnail and duration
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
@@ -184,7 +178,7 @@ const MediaItem: React.FC<MediaItemProps> = ({
         />
       )}
 
-      {/* Play Icon: Visible ONLY if video is paused (and it's a video) */}
+      {/* Play Icon: Always visible if video is paused (which it will be initially) */}
       {/* It uses pointer-events: none in CSS so clicks on it fall through to the parent for insertion */}
       {isVideo && !isTrulyPlaying && (
         <div className="play-icon">▶</div>
@@ -196,9 +190,6 @@ const MediaItem: React.FC<MediaItemProps> = ({
           {isMuted ? <MuteIcon /> : <VolumeIcon />}
         </div>
       )}
-
-      {/* REMOVED: Overlay to display the content type (e.g., "Clip") */}
-      {/* <div className="media-overlay">{activeTab}</div> */}
     </div>
   );
 };
