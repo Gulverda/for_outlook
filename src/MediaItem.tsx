@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import MuteIcon from "./icons/MuteIcon"; // Ensure these paths are correct
-import VolumeIcon from "./icons/VolumeIcon"; // Ensure these paths are correct
+import MuteIcon from "./icons/MuteIcon";
+import VolumeIcon from "./icons/VolumeIcon";
 
-// Re-import your interfaces here to keep MediaItem self-contained
+// Re-import your interfaces here (or ensure they are globally available if using a separate types file)
 interface GifItem {
   id: string;
   uuid: string;
@@ -26,12 +26,11 @@ interface VideoItem {
     mp4: string;
   };
   title: string;
-  hasAudio?: boolean; // Assume true if not provided by API
+  hasAudio?: boolean;
 }
 
 type Item = GifItem | VideoItem;
 
-// Define props for the MediaItem component
 interface MediaItemProps {
   item: Item;
   activeTab: "GIF" | "Clip" | "Sticker";
@@ -54,112 +53,126 @@ const MediaItem: React.FC<MediaItemProps> = ({
   left,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  // Start videos muted to avoid jarring audio upon load
-  const [isMuted, setIsMuted] = useState(true);
-  const [isPlaying, setIsPlaying] = useState(false); // Track if video is currently playing
+  const [isMuted, setIsMuted] = useState(true); // Start muted for autoplay
+  const [isTrulyPlaying, setIsTrulyPlaying] = useState(false); // Tracks actual playback state of the video element
 
   let imageUrl: string;
-  let clickHandler: () => void; // This will now be primarily for inserting into email
-  let showPlayIcon = false;
+  let insertionDetails: { url: string; alt: string; mp4?: string; poster?: string; } | null = null;
   let showSoundIcon = false;
   let isVideo = false;
 
-  // Determine item type and set appropriate properties
+  // Determine item type and set appropriate properties for display and insertion
   if (activeTab === "GIF" || activeTab === "Sticker") {
     const gifItem = item as GifItem;
-    imageUrl = gifItem.file.sm.webp.url; // Use small webp for display
-    clickHandler = () => insertGif(gifItem.file.md.gif.url, gifItem.title); // Use full GIF for insertion
+    imageUrl = gifItem.file.sm.webp.url; // Display thumbnail
+    insertionDetails = {
+      url: gifItem.file.md.gif.url, // Full GIF for insertion
+      alt: gifItem.title
+    };
   } else { // activeTab === "Clip"
     const videoItem = item as VideoItem;
-    imageUrl = videoItem.file.webp; // Thumbnail for the video
-    // The clickHandler here is now for inserting into email
-    clickHandler = () => insertVideo(videoItem.file.mp4, videoItem.file.webp);
-    showPlayIcon = true;
-    showSoundIcon = videoItem.hasAudio ?? true; // Assume audio if not specified
+    imageUrl = videoItem.file.webp; // Thumbnail for the video display
+    insertionDetails = {
+      url: videoItem.file.webp, // This might not be used directly for video insertion, but for consistent interface
+      alt: videoItem.title,
+      mp4: videoItem.file.mp4 // MP4 URL for insertion
+    };
+    showSoundIcon = videoItem.hasAudio ?? true;
     isVideo = true;
   }
 
-  // Effect to manage video playback state for in-app video elements
+  // Effect for auto-play (muted) when component mounts or `isVideo` becomes true
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (isVideo && videoElement) {
+      videoElement.muted = true; // Ensure it's muted for autoplay
+      videoElement.play().catch(error => {
+        console.warn("Video autoplay blocked or failed:", error);
+      });
+    }
+  }, [isVideo]); // Dependency on isVideo to ensure it runs only when it's a video item
+
+  // Effect to update `isTrulyPlaying` state based on video element's play/pause events
   useEffect(() => {
     const videoElement = videoRef.current;
     if (!videoElement) return;
 
-    if (isVideo) {
-      if (isPlaying) {
-        videoElement.play().catch(error => {
-          // Autoplay often blocked by browsers, show a warning if it fails
-          console.warn("Video autoplay blocked or failed:", error);
-          setIsPlaying(false); // Update state if play fails
-        });
-      } else {
-        videoElement.pause();
-      }
-    }
-  }, [isPlaying, isVideo]);
+    const handlePlay = () => setIsTrulyPlaying(true);
+    const handlePause = () => setIsTrulyPlaying(false);
 
-  // Handle click on the entire media item
+    videoElement.addEventListener('play', handlePlay);
+    videoElement.addEventListener('pause', handlePause);
+
+    // Cleanup: remove event listeners when component unmounts or deps change
+    return () => {
+      videoElement.removeEventListener('play', handlePlay);
+      videoElement.removeEventListener('pause', handlePause);
+    };
+  }, [isVideo]); // Re-attach listeners if the item type ever changes (unlikely for same component instance)
+
+
+  // Handle click on the main media item area (only for insertion)
   const handleMediaClick = (e: React.MouseEvent) => {
-    if (isVideo && videoRef.current) {
-      // If it's a video, toggle play/pause for in-app playback
-      if (videoRef.current.paused) {
-        videoRef.current.play().catch(error => console.warn("Video playback blocked on click:", error));
-        setIsPlaying(true);
-        // Automatically unmute when the user explicitly clicks to play
-        setIsMuted(false);
-      } else {
-        videoRef.current.pause();
-        setIsPlaying(false);
+    if (isVideo) {
+      if (insertionDetails?.mp4 && imageUrl) { // Use imageUrl as posterUrl
+          insertVideo(insertionDetails.mp4, imageUrl);
       }
-    } else {
-      // For GIFs/Stickers, or if the video isn't meant for in-app play, use the original insert handler
-      clickHandler();
+    } else { // GIF or Sticker
+      if (insertionDetails?.url && insertionDetails?.alt) {
+          insertGif(insertionDetails.url, insertionDetails.alt);
+      }
     }
   };
 
-  // Handle click on the sound icon specifically
+  // Handle click on the sound icon specifically (toggles mute and playback)
   const handleSoundIconClick = (e: React.MouseEvent) => {
-    // Prevent the parent div's click handler from firing when clicking the sound icon
-    e.stopPropagation();
-    if (videoRef.current) {
-      videoRef.current.muted = !videoRef.current.muted;
-      setIsMuted(videoRef.current.muted); // Update state to reflect new mute status
+    e.stopPropagation(); // VERY IMPORTANT: Prevent the parent div's click handler (handleMediaClick) from firing
+    const videoElement = videoRef.current;
+    if (isVideo && videoElement) {
+      if (videoElement.muted || videoElement.paused) {
+        // If muted or paused, unmute and play
+        videoElement.muted = false;
+        setIsMuted(false);
+        videoElement.play().catch(error => console.warn("Play on sound click failed:", error));
+      } else {
+        // If unmuted and playing, mute and pause
+        videoElement.muted = true;
+        setIsMuted(true);
+        videoElement.pause();
+      }
     }
   };
 
   return (
     <div
-      // Use item.id as key for stability in lists
       key={item.id}
-      className="media-wrapper" // Applies common styling for hover effects
+      className="media-wrapper"
       style={{
         position: "absolute",
         width: `${width}px`,
         height: `${height}px`,
         top,
         left,
-        cursor: "pointer", // Indicates interactivity
-        overflow: "hidden", // Hides overflow for rounded corners
-        borderRadius: "8px", // Applies rounded corners
+        cursor: "pointer",
+        overflow: "hidden",
+        borderRadius: "8px",
       }}
-      onClick={handleMediaClick} // Unified click handler for the whole item
+      onClick={handleMediaClick} // Main click handler for insertion
     >
       {isVideo ? (
-        // Render a <video> element for Clips
         <video
           ref={videoRef}
-          src={(item as VideoItem).file.mp4} // Source URL for the video
-          poster={imageUrl} // Thumbnail as poster image
+          src={insertionDetails?.mp4}
+          poster={imageUrl} // Use display thumbnail as poster
           loop // Keep video looping for continuous display
-          muted={isMuted} // Controlled by our state
+          muted={isMuted} // Controlled by our state, starts muted
           playsInline // Crucial for inline playback on iOS Safari
-          preload="metadata" // Load enough data to show thumbnail and duration, but not the whole video
+          preload="metadata" // Load enough data to show thumbnail and duration
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          controls={false} // We provide custom controls (play/mute icons)
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
+          controls={false} // We provide custom controls (sound icon)
+          // onPlay and onPause event listeners are now handled via a separate useEffect
         />
       ) : (
-        // Render an <img> element for GIFs/Stickers
         <img
           src={imageUrl}
           alt={item.title}
@@ -171,20 +184,21 @@ const MediaItem: React.FC<MediaItemProps> = ({
         />
       )}
 
-      {/* Play Icon: visible for videos when paused */}
-      {isVideo && !isPlaying && (
+      {/* Play Icon: Visible ONLY if video is paused (and it's a video) */}
+      {/* It uses pointer-events: none in CSS so clicks on it fall through to the parent for insertion */}
+      {isVideo && !isTrulyPlaying && (
         <div className="play-icon">▶</div>
       )}
 
-      {/* Sound Icon Overlay: visible for videos, toggles mute */}
+      {/* Sound Icon Overlay: visible for videos, handles mute and playback */}
       {isVideo && showSoundIcon && (
         <div className="sound-icon-overlay" onClick={handleSoundIconClick}>
           {isMuted ? <MuteIcon /> : <VolumeIcon />}
         </div>
       )}
 
-      {/* Overlay for content type (e.g., "Clip") */}
-      <div className="media-overlay">{activeTab}</div>
+      {/* REMOVED: Overlay to display the content type (e.g., "Clip") */}
+      {/* <div className="media-overlay">{activeTab}</div> */}
     </div>
   );
 };

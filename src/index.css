@@ -210,36 +210,14 @@ body {
   width: 100%;
 }
 
-/* Ensure the text overlay appears on hover */
-.media-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  padding: 5px;
-  font-size: 12px;
-  text-align: center;
-  opacity: 0; /* Hidden by default */
-  transition: opacity 0.3s ease;
-  z-index: 1; /* Ensure it's above the image, but below icons */
-}
-
-/* This makes the text overlay visible on hover of the parent .media-wrapper */
-.media-wrapper:hover .media-overlay {
-  opacity: 1;
-}
-
-/* Masonry Container - Ensure it has relative positioning and scrollability */
 .masonry-container {
-  position: relative; /* Crucial for absolute positioning of children */
+  position: relative; 
   overflow-y: auto;
   overflow-x: hidden;
   height: 100dvh;
   background-color: #18181b;
   margin-top: 10px;
-  width: 100% !important; /* Ensure it takes full width */
+  width: 100% !important; 
 }
 
 img {

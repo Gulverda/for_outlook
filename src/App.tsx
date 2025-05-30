@@ -5,7 +5,7 @@ import LogoIcon from "./icons/logo";
 import SearchIcon from "./icons/Search";
 import "react-loading-skeleton/dist/skeleton.css";
 import "./index.css";
-import MediaItem from "./MediaItem"; 
+import MediaItem from "./MediaItem"; // Import the new MediaItem component
 
 // Interface for GIF and Sticker items
 interface GifItem {
