@@ -237,6 +237,7 @@
         height: 100dvh;
         background-color: #18181b;
         margin-top: 10px;
+        width: 100% !important;
     }
 
     img {
