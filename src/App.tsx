@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import Skeleton from "react-loading-skeleton";
+import LogoIcon from "./icons/logo";
+import SearchIcon from "./icons/Search";
 import "react-loading-skeleton/dist/skeleton.css";
 import "./index.css";
 
@@ -118,7 +120,6 @@ export const App = () => {
 
   const items = data?.pages.flat() || [];
 
-  // 🔁 Observe loader and trigger fetch
   useEffect(() => {
     if (!hasNextPage || isFetchingNextPage) return;
 
@@ -142,121 +143,132 @@ export const App = () => {
   return (
     <div className="main-container">
       <div className="app-container">
-      <input
-        type="text"
-        placeholder="Search..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="search-input"
-      />
-      {/* <div className="tab-buttons">
-        <button onClick={() => setActiveTab("GIF")}>GIF</button>
-        <button onClick={() => setActiveTab("Sticker")}>Sticker</button>
-        <button onClick={() => setActiveTab("Clip")}>Clip</button>
-      </div> */}
-  <div id="firstFilter" className="filter-switch">
-  <input
-    type="radio"
-    id="option1"
-    name="value-radio"
-    value="GIF"
-    checked={activeTab === "GIF"}
-    onChange={() => setActiveTab("GIF")}
-  />
-  <label className="option" htmlFor="option1">GIF</label>
+        <div className="logo-container">
+        <LogoIcon />
+      </div>
+        <div className="input-container">
+        <div className="search-icon">
+          <SearchIcon />
+        </div>
+        <input
+          type="text"
+          placeholder="Search for anything..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="search-input"
+        />
+        </div>
+        <div id="firstFilter" className="filter-switch">
+          <input
+            type="radio"
+            id="option1"
+            name="value-radio"
+            value="GIF"
+            checked={activeTab === "GIF"}
+            onChange={() => setActiveTab("GIF")}
+          />
+          <label className="option" htmlFor="option1">
+            GIF
+          </label>
 
-  <input
-    type="radio"
-    id="option2"
-    name="value-radio"
-    value="Sticker"
-    checked={activeTab === "Sticker"}
-    onChange={() => setActiveTab("Sticker")}
-  />
-  <label className="option" htmlFor="option2">Sticker</label>
+          <input
+            type="radio"
+            id="option2"
+            name="value-radio"
+            value="Sticker"
+            checked={activeTab === "Sticker"}
+            onChange={() => setActiveTab("Sticker")}
+          />
+          <label className="option" htmlFor="option2">
+            Sticker
+          </label>
 
-  <input
-    type="radio"
-    id="option3"
-    name="value-radio"
-    value="Clip"
-    checked={activeTab === "Clip"}
-    onChange={() => setActiveTab("Clip")}
-  />
-  <label className="option" htmlFor="option3">Clip</label>
+          <input
+            type="radio"
+            id="option3"
+            name="value-radio"
+            value="Clip"
+            checked={activeTab === "Clip"}
+            onChange={() => setActiveTab("Clip")}
+          />
+          <label className="option" htmlFor="option3">
+            Clip
+          </label>
 
-  <span className="background"></span>
+          <span className="background"></span>
+        </div>
+
+        {isLoading ? (
+          <div className="main-container-for-center">
+            <div className="grid-container">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <>
+                  <Skeleton
+                    key={i}
+                    height={150}
+                    width="100px"
+                    style={{ borderRadius: "8px" }}
+                  />
+                </>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="main-container-for-center">
+  <div className="grid-container">
+    {items.map((item, index) => {
+      if (activeTab === "GIF" || activeTab === "Sticker") {
+        const gif = item as GifItem;
+        return (
+          <div key={index} className="media-wrapper" onClick={() => insertGif(gif.file.md.gif.url, gif.title)}>
+            <img
+              src={gif.file.sm.webp.url}
+              alt={gif.title}
+              className="gif-image"
+            />
+            <div className="media-overlay">{activeTab}</div>
+          </div>
+        );
+      } else if (activeTab === "Clip") {
+        const video = item as VideoItem;
+        return (
+          <div
+            key={index}
+            className="media-wrapper"
+            onClick={() => insertVideo(video.file.mp4, video.file.webp)}
+          >
+            <img
+              src={video.file.webp}
+              alt={video.title}
+              className="video-thumbnail"
+            />
+            <div className="play-icon">▶</div>
+            <div className="media-overlay">{activeTab}</div>
+          </div>
+        );
+      }
+      return null;
+    })}
+  </div>
 </div>
 
+        )}
 
-      {isLoading ? (
-        <div className="main-container-for-center">
-          <div className="grid-container">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <>
+        <div ref={loaderRef} style={{ height: "40px", marginTop: "20px" }}>
+          {isFetchingNextPage && (
+            <div className="grid-container" style={{ marginTop: "20px" }}>
+              {Array.from({ length: 6 }).map((_, i) => (
                 <Skeleton
-                  key={i}
+                  key={`next-${i}`}
                   height={150}
                   width="100px"
                   style={{ borderRadius: "8px" }}
                 />
-              </>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
-      ) : (
-        <div className="main-container-for-center">
-          <div className="grid-container">
-            {items.map((item, index) => {
-              if (activeTab === "GIF" || activeTab === "Sticker") {
-                const gif = item as GifItem;
-                return (
-                  <img
-                    key={index}
-                    src={gif.file.sm.webp.url}
-                    alt={gif.title}
-                    className="gif-image"
-                    onClick={() => insertGif(gif.file.md.gif.url, gif.title)}
-                  />
-                );
-              } else if (activeTab === "Clip") {
-                const video = item as VideoItem;
-                return (
-                  <div
-                    key={index}
-                    className="video-container"
-                    onClick={() => insertVideo(video.file.mp4, video.file.webp)}
-                  >
-                    <img
-                      src={video.file.webp}
-                      alt={video.title}
-                      className="video-thumbnail"
-                    />
-                    <div className="play-icon">▶</div>
-                  </div>
-                );
-              }
-              return null;
-            })}
-          </div>
-        </div>
-      )}
-
-      <div ref={loaderRef} style={{ height: "40px", marginTop: "20px" }}>
-        {isFetchingNextPage && (
-          <div className="grid-container" style={{ marginTop: "20px" }}>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton
-                key={`next-${i}`}
-                height={150}
-                width="100px"
-                style={{ borderRadius: "8px" }}
-              />
-            ))}
-          </div>
-        )}
       </div>
-    </div>
     </div>
   );
 };
