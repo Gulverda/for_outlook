@@ -8,7 +8,7 @@ const LogoIcon = (props: SVGProps<SVGSVGElement>) => (
   xmlnsXlink="http://www.w3.org/1999/xlink"
   x="0px"
   y="0px"
-  width="120px"
+  width="100px"
   viewBox="0 0 1410 400"
   enableBackground="new 0 0 1410 400"
   xmlSpace="preserve"
