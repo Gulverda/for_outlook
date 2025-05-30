@@ -49,9 +49,8 @@
 }
 
 .app-container {
-  padding: 10px;
   width: 100%;
-  max-width: 470px;
+  max-width: 480px;
 }
 
 .input-container{
@@ -77,6 +76,10 @@
   padding: 10px;
   border-radius: 50%;
   background-color: #8800ff;
+}
+
+.masonry-container{
+  background-color: rebeccapurple;
 }
 
 .main-container-for-center{
@@ -225,3 +228,17 @@
 .media-wrapper:hover .media-overlay {
   opacity: 1;
 }
+
+    .masonry-container {
+        position: relative;
+        overflow-y: auto;
+        overflow-x: hidden;
+        height: 100dvh;
+        background-color: #18181b;
+        margin-top: 10px;
+    }
+
+    img {
+        display: block;
+        object-fit: fill;
+    }
