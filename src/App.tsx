@@ -3,10 +3,9 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import Skeleton from "react-loading-skeleton";
 import LogoIcon from "./icons/logo";
 import SearchIcon from "./icons/Search";
-import MuteIcon from "./icons/MuteIcon";   // Import the new icons
-import VolumeIcon from "./icons/VolumeIcon"; // Import the new icons
 import "react-loading-skeleton/dist/skeleton.css";
 import "./index.css";
+import MediaItem from "./MediaItem"; 
 
 // Interface for GIF and Sticker items
 interface GifItem {
@@ -46,7 +45,6 @@ interface VideoItem {
   };
   title: string;
   // Add an optional 'hasAudio' property if your API provides it
-  // For demonstration, we'll assume videos typically have audio if not specified.
   hasAudio?: boolean;
 }
 
@@ -419,63 +417,19 @@ export const App = () => {
                 const top = rowTop; // Top position for the current item
                 currentX += item.width + gap; // Update X-position for the next item in the row
 
-                let imageUrl = item.url; // Default image URL from masonry calculation
-                let clickHandler; // Function to call on item click
-                let showPlayIcon = false;
-                let showSoundIcon = false; // New: Flag to show sound icon
-
-                // Determine the correct image URL for display and the click handler based on the active tab
-                if (activeTab === "GIF" || activeTab === "Sticker") {
-                  const gifItem = item as GifItem;
-                  imageUrl = gifItem.file.sm.webp.url; // Use small webp for display in masonry for performance
-                  clickHandler = () =>
-                    insertGif(gifItem.file.md.gif.url, gifItem.title); // Use full GIF for insertion
-                } else if (activeTab === "Clip") {
-                  const videoItem = item as VideoItem;
-                  imageUrl = videoItem.file.webp; // Use webp thumbnail for display
-                  clickHandler = () =>
-                    insertVideo(videoItem.file.mp4, videoItem.file.webp); // Insert video link
-                  showPlayIcon = true; // Show play icon for clips
-                  showSoundIcon = (videoItem.hasAudio ?? true); // Assume audio if not specified
-                }
-
+                // Render the MediaItem component
                 return (
-                  <div
-                    key={`${rowIndex}-${i}`} // Unique key for each item
-                    style={{
-                      position: "absolute", // Absolute positioning for masonry layout
-                      width: `${item.width}px`,
-                      height: `${item.height}px`,
-                      top,
-                      left,
-                      cursor: "pointer", // Indicate clickable items
-                      overflow: "hidden", // Hide overflow for rounded corners
-                      borderRadius: "8px", // Apply rounded corners
-                    }}
-                    onClick={clickHandler} // Attach the appropriate click handler
-                  >
-                    <img
-                      src={imageUrl}
-                      alt={item.title}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }} // Image fills its container, maintaining aspect ratio
-                    />
-                    {/* Render play icon only for Clip items */}
-                    {showPlayIcon && <div className="play-icon">▶</div>}
-                    {/* Render sound icon only for Clip items */}
-                    {showSoundIcon && (
-                      <div className="sound-icon-overlay">
-                        {/* Here you could toggle between MuteIcon and VolumeIcon if implementing in-app mute,
-                            but for email insertion, VolumeIcon is a sufficient indicator. */}
-                        <VolumeIcon />
-                      </div>
-                    )}
-                    {/* Overlay to display the content type (GIF, Sticker, Clip) */}
-                    <div className="media-overlay">{activeTab}</div>
-                  </div>
+                  <MediaItem
+                    key={item.id} // Essential for React list rendering
+                    item={item}
+                    activeTab={activeTab}
+                    insertGif={insertGif}
+                    insertVideo={insertVideo}
+                    width={item.width}
+                    height={item.height}
+                    top={top}
+                    left={left}
+                  />
                 );
               });
             })}
