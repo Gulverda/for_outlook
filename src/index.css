@@ -51,6 +51,7 @@
 .app-container {
   width: 100%;
   max-width: 480px;
+  padding: 10px;
 }
 
 .input-container{
